@@ -1,4 +1,4 @@
-def remove_nonprintable_chars(string: str):
+def remove_nonprintable_chars(string: str) -> str:
     """ 
     Replace non-printable characters from the given `string` with space.
     """
