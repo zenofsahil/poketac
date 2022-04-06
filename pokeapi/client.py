@@ -1,6 +1,9 @@
+import logging
 import requests
 from typing import Optional
 from urllib.parse import urljoin
+
+logger = logging.getLogger(__name__)
 
 class PokemonClient:
     def __init__(self, base_url: str, endpoint: str, translate_api: str):
@@ -10,7 +13,10 @@ class PokemonClient:
 
     def get_pokemon_info(self, name: str, translate: bool = False) -> dict:
         if translate:
+            logger.info('Translate API called for pokemon %s', name)
             return self.get_pokemon_info_translated(name)
+
+        logger.info('Basic API called for pokemon %s', name)
         return self.get_pokemon_info_basic(name)
 
     def get_pokemon_info_basic(self, name: str) -> dict:
@@ -18,6 +24,9 @@ class PokemonClient:
         Get basic information for the pokemon as specified by `name`
         """
         url = urljoin(self.base_url, f'{self.endpoint}/{name}')
+        
+        logger.debug('Fetching URL: %s', url)
+
         r = requests.get(url)
 
         if r.ok and r.json() is not None:
@@ -33,6 +42,19 @@ class PokemonClient:
 
     def get_pokemon_info_translated(self, name: str) -> dict:
         basic_info = self.get_pokemon_info_basic(name)
+        logger.debug('Retrieved basic information')
+        translated_info = self.translate_description(basic_info)
+        return basic_info
+
+    def translate_description(self, basic_info: dict) -> dict:
+        """
+        Attempt translation of the description of the pokemon.
+
+        If the pokemon has a habitat of "cave" or the "isLegendary" value for
+        the pokemon is True, then the "yoda" translation would be requested. 
+        For all other cases, the "shakespeare" translation would be requested.
+        """
+        logger.debug('Attempting translation')
         return basic_info
 
     @staticmethod
@@ -41,7 +63,10 @@ class PokemonClient:
         Extract the habitat value from the `json_content`
         """
         habitat = json_content.get('habitat')
-        return habitat.get('name') if habitat else None
+        if habitat:
+            return habitat.get('name')
+        logger.debug('No valid habitat value found')
+        return None
             
     @staticmethod
     def get_description(json_content: dict) -> Optional[str]:
@@ -60,5 +85,6 @@ class PokemonClient:
                     description.get('flavor_text') is not None
                 ):
                     return description.get('flavor_text')
+        logger.debug('No valid description found.')
         return None
 
