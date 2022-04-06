@@ -7,5 +7,3 @@ class PokemonInfo(BaseModel):
     description: Optional[str]
     isLegendary: bool
 
-class PokemonInfoTranslated(BaseModel):
-    name: str
