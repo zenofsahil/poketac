@@ -8,7 +8,12 @@ class PokemonClient:
         self.endpoint = endpoint
         self.translate_api = translate_api
 
-    def get_pokemon_info(self, name: str) -> dict:
+    def get_pokemon_info(self, name: str, translate: bool = False) -> dict:
+        if translate:
+            return self.get_pokemon_info_translated(name)
+        return self.get_pokemon_info_basic(name)
+
+    def get_pokemon_info_basic(self, name: str) -> dict:
         """
         Get basic information for the pokemon as specified by `name`
         """
@@ -25,6 +30,10 @@ class PokemonClient:
             return response
         else:
             raise Exception
+
+    def get_pokemon_info_translated(self, name: str) -> dict:
+        basic_info = self.get_pokemon_info_basic(name)
+        return basic_info
 
     @staticmethod
     def get_habitat(json_content: dict) -> Optional[str]:
