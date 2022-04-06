@@ -21,7 +21,8 @@ app.add_middleware(
 
 pokemon_client = client.PokemonClient(
     base_url=settings.BASE_URL,
-    endpoint=settings.ENDPOINT
+    endpoint=settings.ENDPOINT,
+    translate_api=settings.TRANSLATE_API
 )
 
 @app.get("/pokemon/{pokemon_name}", response_model=List[schemas.PokemonInfo])
