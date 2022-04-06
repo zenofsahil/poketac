@@ -6,3 +6,5 @@ def test_remove_nonprintable_chars():
 
     assert remove_nonprintable_chars(test_string) == output_string
 
+def test_remove_nonprintable_chars_empty_string():
+    assert remove_nonprintable_chars("") == ""
