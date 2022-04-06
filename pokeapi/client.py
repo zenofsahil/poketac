@@ -56,6 +56,12 @@ class PokemonTranslatedClient:
         self.endpoint = endpoint
 
     def get_pokemon_info(self, name):
-        return { 'name': name }
+        response = {
+            'name' : name,
+            'description' : "",
+            'habitat' : "world",
+            'isLegendary' : False
+        }
+        return response
 
 
