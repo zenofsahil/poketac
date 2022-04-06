@@ -3,9 +3,10 @@ from typing import Optional
 from urllib.parse import urljoin
 
 class PokemonClient:
-    def __init__(self, base_url, endpoint):
+    def __init__(self, base_url: str, endpoint: str, translate_api: str):
         self.base_url = base_url
         self.endpoint = endpoint
+        self.translate_api = translate_api
 
     def get_pokemon_info(self, name: str) -> dict:
         """
