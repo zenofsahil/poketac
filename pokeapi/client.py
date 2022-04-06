@@ -52,19 +52,3 @@ class PokemonClient:
                     return description.get('flavor_text')
         return None
 
-
-class PokemonTranslatedClient:
-    def __init__(self, base_url, endpoint):
-        self.base_url = base_url
-        self.endpoint = endpoint
-
-    def get_pokemon_info(self, name):
-        response = {
-            'name' : name,
-            'description' : "",
-            'habitat' : "world",
-            'isLegendary' : False
-        }
-        return response
-
-
