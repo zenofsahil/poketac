@@ -9,6 +9,22 @@ from pokeapi import schemas
 from pokeapi.config import settings
 from pokeapi import client
 
+import logging
+from pokeapi.config import settings
+
+def get_log_level():
+    if settings.LOG_LEVEL == 'INFO':
+        return logging.INFO
+    elif settings.LOG_LEVEL == 'DEBUG':
+        return logging.DEBUG
+    return logging.ERROR
+
+logging.basicConfig(level=get_log_level())
+logger = logging.getLogger(__name__)
+
+logger.info('hello info')
+logger.debug('hello debuug')
+
 app = FastAPI(title=settings.PROJECT_NAME)
 
 app.add_middleware(
