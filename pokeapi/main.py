@@ -28,14 +28,14 @@ pokemon_client = client.PokemonClient(
 @app.get("/pokemon/{pokemon_name}", response_model=List[schemas.PokemonInfo])
 def get_pokemon_info(pokemon_name: str):
     pokemons = [
-        pokemon_client.get_pokemon_info(pokemon_name)
+        pokemon_client.get_pokemon_info(name=pokemon_name, translate=False)
     ]
     return pokemons
 
 @app.get("/pokemon/translated/{pokemon_name}", response_model=List[schemas.PokemonInfo])
-def get_pokemon_info_translateed(pokemon_name: str):
+def get_pokemon_info_translated(pokemon_name: str):
     pokemons = [
-        pokemon_client.get_pokemon_info(pokemon_name)
+        pokemon_client.get_pokemon_info(name=pokemon_name, translate=True)
     ]
     return pokemons
 
