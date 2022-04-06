@@ -6,6 +6,7 @@ from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 class Settings(BaseSettings):
     PROJECT_NAME: str
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    LOG_LEVEL: str = "INFO"
     
     BASE_URL: str = ""
     ENDPOINT: str = ""
