@@ -35,7 +35,7 @@ def get_pokemon_info(pokemon_name: str):
     ]
     return pokemons
 
-@app.get("/pokemon/translated/{pokemon_name}", response_model=List[schemas.PokemonInfoTranslated])
+@app.get("/pokemon/translated/{pokemon_name}", response_model=List[schemas.PokemonInfo])
 def get_pokemon_info_translateed(pokemon_name: str):
     pokemons = [
         pokemon_translated_client.get_pokemon_info(pokemon_name)
