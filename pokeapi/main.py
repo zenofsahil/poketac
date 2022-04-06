@@ -7,6 +7,7 @@ from fastapi.encoders import jsonable_encoder
 
 from pokeapi import schemas
 from pokeapi.config import settings
+from pokeapi import client
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -18,17 +19,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+pokemon_client = client.PokemonClient(
+    base_url=settings.BASE_URL,
+    endpoint=settings.ENDPOINT
+)
+pokemon_translated_client = client.PokemonTranslatedClient(
+    base_url=settings.BASE_URL,
+    endpoint=settings.ENDPOINT
+)
+
 @app.get("/pokemon/{pokemon_name}", response_model=List[schemas.PokemonInfo])
 def get_pokemon_info(pokemon_name: str):
     pokemons = [
-            { 'name': pokemon_name }
+        pokemon_client.get_pokemon_info(pokemon_name)
     ]
     return pokemons
 
 @app.get("/pokemon/translated/{pokemon_name}", response_model=List[schemas.PokemonInfoTranslated])
 def get_pokemon_info_translateed(pokemon_name: str):
     pokemons = [
-            { 'name': pokemon_name }
+        pokemon_translated_client.get_pokemon_info(pokemon_name)
     ]
     return pokemons
 
