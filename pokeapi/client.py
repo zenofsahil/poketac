@@ -1,5 +1,6 @@
 import logging
 import requests
+from functools import lru_cache
 from typing import Optional
 from urllib.parse import urljoin
 
@@ -27,7 +28,7 @@ class PokemonClient:
         
         logger.debug('Fetching URL: %s', url)
 
-        r = requests.get(url)
+        r = self.fetch_url(url)
 
         if r.ok and r.json() is not None:
             response = {
@@ -39,6 +40,12 @@ class PokemonClient:
             return response
         else:
             raise Exception
+    
+    @staticmethod
+    @lru_cache
+    def fetch_url(url: str) -> dict:
+        logger.debug('Result not present in cache. Requesting data from network.')
+        return requests.get(url)
 
     def get_pokemon_info_translated(self, name: str) -> dict:
         basic_info = self.get_pokemon_info_basic(name)
