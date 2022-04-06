@@ -3,6 +3,8 @@ import requests
 from functools import lru_cache
 from typing import Optional
 from urllib.parse import urljoin
+from requests.models import PreparedRequest
+from pokeapi.utils import remove_nonprintable_chars
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +101,7 @@ class PokemonClient:
         """
         Extract the printable english description from the `json_content`
         """
-        descriptions = json_content.get('flavour_text_entries')
+        descriptions = json_content.get('flavor_text_entries')
 
         if descriptions is not None and len(descriptions) > 0:
             for description in descriptions:
@@ -110,7 +112,8 @@ class PokemonClient:
                     language.get('name') == 'en' and
                     description.get('flavor_text') is not None
                 ):
-                    return description.get('flavor_text')
+                    return remove_nonprintable_chars(description.get('flavor_text', ''))
+        
         logger.debug('No valid description found.')
         return None
 
