@@ -1,5 +1,6 @@
 import logging
 import requests
+from functools import lru_cache
 from typing import Optional
 from urllib.parse import urljoin
 
@@ -27,7 +28,7 @@ class PokemonClient:
         
         logger.debug('Fetching URL: %s', url)
 
-        r = requests.get(url)
+        r = self.fetch_url(url)
 
         if r.ok and r.json() is not None:
             response = {
@@ -39,6 +40,25 @@ class PokemonClient:
             return response
         else:
             raise Exception
+    
+    @staticmethod
+    @lru_cache
+    def fetch_url(url: str) -> dict:
+        """
+        Fetch information from the given `url`. This method implements a lru_cache
+        mechanism so any information requested once will be cached for further 
+        requests.
+
+        This could have some downsides as this cache will live within the context of 
+        the PokemonClient class definition. This could possibly have potential
+        security implications as this will now become a common cache pool for all
+        clients requesting data from our API. 
+
+        For production, I would consider separating out caching to its own layer
+        using Redis or memcached.
+        """
+        logger.debug('Result not present in cache. Requesting data from network.')
+        return requests.get(url)
 
     def get_pokemon_info_translated(self, name: str) -> dict:
         basic_info = self.get_pokemon_info_basic(name)
