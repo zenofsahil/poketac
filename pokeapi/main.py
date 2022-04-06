@@ -6,16 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 
 from pokeapi import schemas
+from pokeapi.config import settings
 
-app = FastAPI()
-
-origins = [
-    "http://localhost:8000",
-]
+app = FastAPI(title=settings.PROJECT_NAME)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
