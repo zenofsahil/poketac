@@ -21,11 +21,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/", response_model=List[schemas.PokemonInfo])
-def get_pokemon_info():
+@app.get("/pokemon/{pokemon_name}", response_model=List[schemas.PokemonInfo])
+def get_pokemon_info(pokemon_name: str):
     pokemons = [
-            { 'name': 'charizard' }, { 'name': 'pikachu' }
+            { 'name': pokemon_name }
     ]
     return pokemons
 
+@app.get("/pokemon/translated/{pokemon_name}", response_model=List[schemas.PokemonInfoTranslated])
+def get_pokemon_info_translateed(pokemon_name: str):
+    pokemons = [
+            { 'name': pokemon_name }
+    ]
+    return pokemons
 
