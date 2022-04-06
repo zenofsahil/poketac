@@ -7,11 +7,14 @@ class PokemonClient:
         self.base_url = base_url
         self.endpoint = endpoint
 
-    def get_pokemon_info(self, name):
+    def get_pokemon_info(self, name: str) -> dict:
+        """
+        Get basic information for the pokemon as specified by `name`
+        """
         url = urljoin(self.base_url, f'{self.endpoint}/{name}')
         r = requests.get(url)
+
         if r.ok and r.json() is not None:
-            
             response = {
                 'name' : r.json().get('name', name),
                 'description' : self.get_description(r.json()),
