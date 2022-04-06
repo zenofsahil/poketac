@@ -56,6 +56,12 @@ class PokemonClient:
 
         For production, I would consider separating out caching to its own layer
         using Redis or memcached.
+
+        NOTE: Using the lru_cache on staticmethods does not interfere with garbage
+        collection of class instances. However, since the cache will follow the
+        lifetime of the class definition, the initialized cache object will 
+        continue to exist even after specific instances of the class have been
+        garbage collected.
         """
         logger.debug('Result not present in cache. Requesting data from network.')
         return requests.get(url)
