@@ -5,7 +5,7 @@ from fastapi import Depends, FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 
-import schemas
+from pokeapi import schemas
 
 app = FastAPI()
 
