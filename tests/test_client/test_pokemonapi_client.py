@@ -152,7 +152,7 @@ class TestPokemonClient:
         kind = pokemon_client.get_translation_kind(basic_info)
         assert kind == 'yoda'
 
-    def test_get_translation_kind_shakespeare_1(self):
+    def test_get_translation_kind_shakespeare(self):
         basic_info = {
             "name": "pikachu",
             "habitat": "forest",
