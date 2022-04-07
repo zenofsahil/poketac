@@ -1,4 +1,6 @@
 import pytest
+from unittest.mock import Mock
+from requests.models import Response
 from pokeapi.client import requests
 from pokeapi.main import pokemon_client
 from datetime import datetime
@@ -6,9 +8,12 @@ from datetime import datetime
 class TestPokemonClient:
     def test_get_pokemon_info(self, pokemon_data, monkeypatch):
         def patched(arg):
-            return pokemon_data('pikachu')
+            res = Mock(spec=Response)
+            res.json.return_value = pokemon_data('pikachu')
+            res.status_code = 200
+            return res
 
-        monkeypatch.setattr(pokemon_client, 'fetch_url', patched)
+        monkeypatch.setattr(requests, 'get', patched)
         output = pokemon_client.get_pokemon_info(name='pikachu', translate=False)
         expected_output =  {
             "name": "pikachu",
@@ -23,9 +28,13 @@ class TestPokemonClient:
 
     def test_get_pokemon_info_basic(self, pokemon_data, monkeypatch):
         def patched(arg):
-            return pokemon_data('pikachu')
+            res = Mock(spec=Response)
+            res.json.return_value = pokemon_data('pikachu')
+            res.status_code = 200
+            return res
 
-        monkeypatch.setattr(pokemon_client, 'fetch_url', patched)
+        monkeypatch.setattr(requests, 'get', patched)
+
         output = pokemon_client.get_pokemon_info(name='pikachu', translate=False)
         expected_output =  {
             "name": "pikachu",
@@ -45,7 +54,10 @@ class TestPokemonClient:
         """
         assert True
 
-    def test_translate_description(self):
+    def test_translate_description_yoda(self):
+        raise NotImplementedError
+
+    def test_translate_description_shakespeare(self):
         raise NotImplementedError
 
     def test_get_habitat(self):
@@ -111,10 +123,13 @@ class TestPokemonClient:
         kind = pokemon_client.get_translation_kind(basic_info)
         assert kind == 'shakespeare'
 
-    def test_pokemonapi_client_caching(monkeypatch):
+    def test_pokemonapi_client_caching(self, monkeypatch):
 
         def patched(arg):
-            return datetime.utcnow().timestamp()
+            res = Mock(spec=Response)
+            res.json.return_value = datetime.utcnow().timestamp()
+            res.status_code = 200
+            return res
 
         monkeypatch.setattr(requests, 'get', patched)
         data1 = pokemon_client.fetch_url('https://sample.url')
