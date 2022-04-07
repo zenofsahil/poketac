@@ -22,7 +22,6 @@ class TestPokemonClient:
     def test_get_habitat(self):
         raise NotImplementedError
 
-
     def test_get_description(self):
         raise NotImplementedError
 
@@ -32,8 +31,38 @@ class TestPokemonClient:
     def test_translate_description(self):
         raise NotImplementedError
 
-    def test_get_translation_kind():
-        raise NotImplementedError
+    def test_get_translation_kind_yoda_1(self):
+        basic_info = {
+            "name": "pikachu",
+            "habitat": "forest",
+            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
+            "isLegendary": True
+        }
+
+        kind = pokemon_client.get_translation_kind(basic_info)
+        assert kind == 'yoda'
+
+    def test_get_translation_kind_yoda_2(self):
+        basic_info = {
+            "name": "pikachu",
+            "habitat": "cave",
+            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
+            "isLegendary": False
+        }
+
+        kind = pokemon_client.get_translation_kind(basic_info)
+        assert kind == 'yoda'
+
+    def test_get_translation_kind_shakespeare_1(self):
+        basic_info = {
+            "name": "pikachu",
+            "habitat": "forest",
+            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
+            "isLegendary": False
+        }
+
+        kind = pokemon_client.get_translation_kind(basic_info)
+        assert kind == 'shakespeare'
 
     def test_pokemonapi_client_caching(monkeypatch):
 
