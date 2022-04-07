@@ -47,9 +47,17 @@ def test_pokemon_api_down():
 def test_translation_api_down():
     raise NotImplementedError
 
-@pytest.mark.parametrize('endpoint', range(5))
-def test_incorrect_endpoint_hit(endpoint):
-    raise NotImplementedError
+@pytest.mark.parametrize('url_part', [
+    "/pokemons/hello",
+    "/index.html",
+    "/admin",
+    "/pokemon/pikachu/hello",
+    "/pokemon/translate/",
+    "/pokemon/translate/pikachus?q=hello"
+])
+def test_incorrect_endpoint_hit(url_part, client):
+    response = client.get(url_part)
+    assert response.status_code == 404
 
 @pytest.mark.skip(reason="Should belong in integration tests")
 def test_pokemonapi_client(client):
