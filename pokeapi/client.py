@@ -100,22 +100,29 @@ class PokemonClient:
         logger.debug('Attempting translation from url: %s', prepared_request.url)
         translation_req = self.fetch_url(prepared_request.url)
         
-        translated_description = None
-        if translation_req.ok:
-            translation_req_json = translation_req.json()
-            if (
-                translation_req_json.get('success') is not None and
-                translation_req_json.get('success').get('total', 0) > 0
-            ): 
-                translated_description = (
-                    translation_req_json
-                    .get('contents')
-                    .get('translated') 
-                    if translation_req_json.get('contents') else None
-                )
+        translated_description = self.extract_translation(translation_req_json)
 
         # Return merged dictionary
         return {**basic_info, **{'description': translated_description}}
+
+    @staticmethod
+    def extract_translation(response: dict) -> Optional[str]:
+        """
+        Extract the translation from the the response of the funtranslations API
+        """
+        translated_description = None
+        translation_req_json = translation_req.json()
+        if (
+            translation_req_json.get('success') is not None and
+            translation_req_json.get('success').get('total', 0) > 0
+        ): 
+            translated_description = (
+                translation_req_json
+                .get('contents')
+                .get('translated') 
+                if translation_req_json.get('contents') else None
+            )
+        return translated_description
 
     @staticmethod
     def get_translation_kind(basic_info: dict) -> str:
@@ -135,9 +142,9 @@ class PokemonClient:
         """
         Extract the habitat value from the `json_content`
         """
-        habitat = json_content.get('habitat')
-        if habitat:
-            return habitat.get('name')
+        habitat_dict = json_content.get('habitat')
+        if habitat_dict:
+            return habitat_dict.get('name')
         logger.debug('No valid habitat value found')
         return None
             
