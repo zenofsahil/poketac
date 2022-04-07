@@ -41,6 +41,7 @@ class TestPokemonClient:
         }
         assert output == expected_output
 
+    @pytest.mark.skip(reason="All functionality in this method is already being tested")
     def test_get_pokemon_info_translated(self):
         raise NotImplementedError
 
@@ -67,7 +68,11 @@ class TestPokemonClient:
         assert pokemon_client.extract_translation(response) == translation
 
 
-    def test_translate_description_yoda(self, monkeypatch):
+    def test_translate_description(self, monkeypatch):
+        """
+        This test is there only to test the end to end functionality of the
+        `translate_description` method.
+        """
         basic_info = {
             "name": "pikachu",
             "habitat": "forest",
@@ -102,9 +107,6 @@ class TestPokemonClient:
 
         translated_res = pokemon_client.translate_description(basic_info)
         assert translated_res == expected_output
-
-    def test_translate_description_shakespeare(self):
-        raise NotImplementedError
 
     def test_get_habitat(self, pokemon_data):
         data = pokemon_data('pikachu')
