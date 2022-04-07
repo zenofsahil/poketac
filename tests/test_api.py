@@ -11,6 +11,7 @@ def test_payload_keys(client):
     assert "habitat" in payload
     assert "isLegendary" in payload
 
+@pytest.mark.skip()
 def test_payload_keys_translation_endpoint(client):
     response = client.get("/pokemon/translated/pikachu")
     assert response.status_code == 200
@@ -22,7 +23,7 @@ def test_payload_keys_translation_endpoint(client):
     assert "habitat" in payload
     assert "isLegendary" in payload
 
-def test_valid_request():
+def test_valid_pokemon():
     """
     Test for /pokemon/pikachu
     """
