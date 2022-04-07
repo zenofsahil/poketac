@@ -8,11 +8,12 @@ services:
     build:
         context: .
         dockerfile: ./Dockerfile
-    command: ["uvicorn", "pokeapi.main:app", "--host", "0.0.0.0", "--port", "80"]
+    volumes:
+      - ./pokeapi:/app/pokeapi
+    env_file: .envars
+    command: ["uvicorn", "pokeapi.main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
     ports:
       - "8000:80"
     stdin_open: true
     tty: true
-
-
 
