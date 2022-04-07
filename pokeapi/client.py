@@ -3,6 +3,8 @@ import requests
 from functools import lru_cache
 from typing import Optional
 from urllib.parse import urljoin
+from requests.models import PreparedRequest
+from pokeapi.utils import remove_nonprintable_chars
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +72,7 @@ class PokemonClient:
         basic_info = self.get_pokemon_info_basic(name)
         logger.debug('Retrieved basic information')
         translated_info = self.translate_description(basic_info)
-        return basic_info
+        return translated_info
 
     def translate_description(self, basic_info: dict) -> dict:
         """
@@ -79,9 +81,47 @@ class PokemonClient:
         If the pokemon has a habitat of "cave" or the "isLegendary" value for
         the pokemon is True, then the "yoda" translation would be requested. 
         For all other cases, the "shakespeare" translation would be requested.
+
+        Can receive code 429 from the translation api.
         """
-        logger.debug('Attempting translation')
-        return basic_info
+        logger.debug('Attempting translation.')
+
+        translation_kind = 'shakespeare'
+
+        habitat = basic_info.get('habitat')
+        is_legendary = basic_info.get('isLegendary')
+        
+        if habitat == 'cave' or is_legendary:
+            logger.debug('Habitat detected as %s. Legendary status is %s', habitat, is_legendary)
+            translation_kind = 'yoda'
+
+        logger.info('Attempting "%s" translation.', translation_kind)
+
+        translation_url = urljoin(self.translate_api, f'translate/{translation_kind}')
+        request_data = {'text': basic_info.get('description')}
+
+        prepared_request = PreparedRequest()
+        prepared_request.prepare_url(translation_url, request_data)
+
+        logger.debug('Attempting translation from url: %s', prepared_request.url)
+        translation_req = self.fetch_url(prepared_request.url)
+        
+        translated_description = None
+        if translation_req.ok:
+            translation_req_json = translation_req.json()
+            if (
+                translation_req_json.get('success') is not None and
+                translation_req_json.get('success').get('total', 0) > 0
+            ): 
+                translated_description = (
+                    translation_req_json
+                    .get('contents')
+                    .get('translated') 
+                    if translation_req_json.get('contents') else None
+                )
+
+        # Return merged dictionary
+        return {**basic_info, **{'description': translated_description}}
 
     @staticmethod
     def get_habitat(json_content: dict) -> Optional[str]:
@@ -99,7 +139,7 @@ class PokemonClient:
         """
         Extract the printable english description from the `json_content`
         """
-        descriptions = json_content.get('flavour_text_entries')
+        descriptions = json_content.get('flavor_text_entries')
 
         if descriptions is not None and len(descriptions) > 0:
             for description in descriptions:
@@ -110,7 +150,8 @@ class PokemonClient:
                     language.get('name') == 'en' and
                     description.get('flavor_text') is not None
                 ):
-                    return description.get('flavor_text')
+                    return remove_nonprintable_chars(description.get('flavor_text', ''))
+        
         logger.debug('No valid description found.')
         return None
 
