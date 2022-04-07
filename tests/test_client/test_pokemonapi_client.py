@@ -33,11 +33,22 @@ class TestPokemonClient:
         habitat = pokemon_client.get_habitat(basic_info)
         assert habitat == 'forest'
 
-    def test_get_description(self):
-        raise NotImplementedError
+    def test_get_description(self, pokemon_data):
+        pikachu_info = pokemon_data("pikachu")
+        description = pokemon_client.get_description(pikachu_info)
+        expected_description = "When several of these POKéMON gather, their electricity could build and cause lightning storms."
+        assert description == expected_description
 
-    def test_get_description_no_english_description_found(self):
-        raise NotImplementedError
+    def test_get_description_no_english_description_found(self, pokemon_data):
+        pikachu_info = pokemon_data("pikachu")
+        descriptions = [
+            d for d in pikachu_info['flavor_text_entries']
+            if d['language']['name'] != 'en'
+        ]
+        pikachu_info['flavor_text_entries'] = descriptions
+        description = pokemon_client.get_description(pikachu_info)
+        expected_description = None
+        assert description == expected_description
 
     def test_translate_description(self):
         raise NotImplementedError
