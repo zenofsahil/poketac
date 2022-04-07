@@ -1,4 +1,3 @@
-import os
 import pytest
 
 def test_payload_keys(client):
@@ -12,7 +11,7 @@ def test_payload_keys(client):
     assert "habitat" in payload
     assert "isLegendary" in payload
 
-@pytest.mark.skip()
+@pytest.mark.skip(reason="Expensive Test. Rate limited API")
 def test_payload_keys_translation_endpoint(client):
     response = client.get("/pokemon/translated/pikachu")
     assert response.status_code == 200
@@ -24,24 +23,23 @@ def test_payload_keys_translation_endpoint(client):
     assert "habitat" in payload
     assert "isLegendary" in payload
 
-def test_valid_pokemon():
+def test_valid_pokemon(client):
     """
     Test for /pokemon/pikachu
     """
-    base_url = os.environ.get('BASE_URL', 'https://pokeapi.co')
-    endpoint = os.environ.get('ENDPOINT', 'api/v2/pokemon-species')
-    pokemon_name = 'pikachu'
-    url = urljoin(base_url, f'{endpoint}/{pokemon_name}')
-    r = requests.get(url)
+    r = client.get("/pokemon/pikachu")
 
     assert r.ok 
     assert r.json() is not None
 
-def test_invalid_pokemon():
+def test_invalid_pokemon(client):
     """
     Test for /pokemon/spiderman
     """
-    raise NotImplementedError
+    r = client.get("/pokemon/spiderman")
+
+    assert r.ok == False
+    assert r.status_code == 404
 
 def test_pokemon_api_down():
     raise NotImplementedError
