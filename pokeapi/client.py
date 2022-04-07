@@ -98,7 +98,7 @@ class PokemonClient:
         prepared_request.prepare_url(translation_url, request_data)
 
         logger.debug('Attempting translation from url: %s', prepared_request.url)
-        translation_req = self.fetch_url(prepared_request.url)
+        translation_req_json = self.fetch_url(prepared_request.url)
         
         translated_description = self.extract_translation(translation_req_json)
 
@@ -111,16 +111,15 @@ class PokemonClient:
         Extract the translation from the the response of the funtranslations API
         """
         translated_description = None
-        translation_req_json = translation_req.json()
         if (
-            translation_req_json.get('success') is not None and
-            translation_req_json.get('success').get('total', 0) > 0
+            response.get('success') is not None and
+            response.get('success').get('total', 0) > 0
         ): 
             translated_description = (
-                translation_req_json
+                response
                 .get('contents')
                 .get('translated') 
-                if translation_req_json.get('contents') else None
+                if response.get('contents') else None
             )
         return translated_description
 
