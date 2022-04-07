@@ -1,5 +1,5 @@
 class PokeAPIException(Exception):
-    """ Top level exception for our application
+    """ Top level exception class for our application
     """
     pass
 
@@ -20,7 +20,7 @@ class PokemonAPIHTTPException(PokemonAPIException):
         self.status_code = status_code
         self.detail = detail
 
-class TranslationAPIHTTPException(TranslationAPIHTTPException):
+class TranslationAPIHTTPException(TranslationAPIException):
     """ Exception class for HTTP related exceptions for the translation api
     """
     def __init__(self, status_code, detail):
