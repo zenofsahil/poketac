@@ -14,13 +14,24 @@ class TestPokemonClient:
         raise NotImplementedError
 
     def test_fetch_url(self):
-        pass
+        """ The fetch_url method is trivially implemented and the core 
+        caching functionality is already being tested in the 
+        test_pokemonapi_client_caching test function.
+        """
+        assert True
 
     def test_translate_description(self):
         raise NotImplementedError
 
     def test_get_habitat(self):
-        raise NotImplementedError
+        basic_info = {
+            "name": "pikachu",
+            "habitat": "forest",
+            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
+            "isLegendary": False
+        }
+        habitat = pokemon_client.get_habitat(basic_info)
+        assert habitat == 'forest'
 
     def test_get_description(self):
         raise NotImplementedError
