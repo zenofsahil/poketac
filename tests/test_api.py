@@ -1,3 +1,4 @@
+import os
 import pytest
 
 def test_payload_keys(client):
@@ -27,7 +28,14 @@ def test_valid_pokemon():
     """
     Test for /pokemon/pikachu
     """
-    raise NotImplementedError
+    base_url = os.environ.get('BASE_URL', 'https://pokeapi.co')
+    endpoint = os.environ.get('ENDPOINT', 'api/v2/pokemon-species')
+    pokemon_name = 'pikachu'
+    url = urljoin(base_url, f'{endpoint}/{pokemon_name}')
+    r = requests.get(url)
+
+    assert r.ok 
+    assert r.json() is not None
 
 def test_invalid_pokemon():
     """
