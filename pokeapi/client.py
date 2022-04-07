@@ -32,16 +32,13 @@ class PokemonClient:
 
         r = self.fetch_url(url)
 
-        if r.ok and r.json() is not None:
-            response = {
-                'name' : r.json().get('name', name),
-                'description' : self.get_description(r.json()),
-                'habitat' : self.get_habitat(r.json()),
-                'isLegendary' : r.json().get('is_legendary', False)
-            }
-            return response
-        else:
-            raise Exception
+        response = {
+            'name' : r.get('name', name),
+            'description' : self.get_description(r),
+            'habitat' : self.get_habitat(r),
+            'isLegendary' : r.get('is_legendary', False)
+        }
+        return response
     
     @staticmethod
     @lru_cache
@@ -66,7 +63,13 @@ class PokemonClient:
         garbage collected.
         """
         logger.debug('Result not present in cache. Requesting data from network.')
-        return requests.get(url)
+        r = requests.get(url)
+
+        if r.ok and r.json() is not None:
+            return r.json()
+
+        raise Exception
+
 
     def get_pokemon_info_translated(self, name: str) -> dict:
         basic_info = self.get_pokemon_info_basic(name)
