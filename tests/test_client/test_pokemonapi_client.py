@@ -23,9 +23,6 @@ class TestPokemonClient:
         }
         assert output == expected_output
 
-    def test_get_pokemon_info_translated_flag(self, pokemon_data):
-        raise NotImplementedError
-
     def test_get_pokemon_info_basic(self, pokemon_data, monkeypatch):
         def patched(arg):
             res = Mock(spec=Response)
@@ -54,20 +51,64 @@ class TestPokemonClient:
         """
         assert True
 
-    def test_translate_description_yoda(self):
-        raise NotImplementedError
+    def test_extract_translation(self):
+        response = {
+            "success": {
+                "total": 1
+            },
+            "contents": {
+                "translated": "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms.",
+                "text": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
+                "translation": "shakespeare"
+            }
+        }
+        translation =  "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms."
 
-    def test_translate_description_shakespeare(self):
-        raise NotImplementedError
+        assert pokemon_client.extract_translation(response) == translation
 
-    def test_get_habitat(self):
+
+    def test_translate_description_yoda(self, monkeypatch):
         basic_info = {
             "name": "pikachu",
             "habitat": "forest",
             "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
-            "isLegendary": False
+            "isLegendary": True
         }
-        habitat = pokemon_client.get_habitat(basic_info)
+
+        def patched(arg):
+            res = Mock(spec=Response)
+            res.json.return_value = {
+                "success": {
+                    "total": 1
+                },
+                "contents": {
+                    "translated": "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms.",
+                    "text": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
+                    "translation": "shakespeare"
+                }
+            }
+            res.status_code = 200
+            return res
+        
+        monkeypatch.setattr(requests, 'get', patched)
+
+        expected_output = {
+            "name": "pikachu",
+            "habitat": "forest",
+            "description": "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms.",
+            "isLegendary": True
+        }
+
+
+        translated_res = pokemon_client.translate_description(basic_info)
+        assert translated_res == expected_output
+
+    def test_translate_description_shakespeare(self):
+        raise NotImplementedError
+
+    def test_get_habitat(self, pokemon_data):
+        data = pokemon_data('pikachu')
+        habitat = pokemon_client.get_habitat(data)
         assert habitat == 'forest'
 
     def test_get_description(self, pokemon_data):
@@ -86,9 +127,6 @@ class TestPokemonClient:
         description = pokemon_client.get_description(pikachu_info)
         expected_description = None
         assert description == expected_description
-
-    def test_translate_description(self):
-        raise NotImplementedError
 
     def test_get_translation_kind_yoda_1(self):
         basic_info = {
