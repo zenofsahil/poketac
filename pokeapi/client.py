@@ -32,16 +32,13 @@ class PokemonClient:
 
         r = self.fetch_url(url)
 
-        if r.ok and r.json() is not None:
-            response = {
-                'name' : r.json().get('name', name),
-                'description' : self.get_description(r.json()),
-                'habitat' : self.get_habitat(r.json()),
-                'isLegendary' : r.json().get('is_legendary', False)
-            }
-            return response
-        else:
-            raise Exception
+        response = {
+            'name' : r.get('name', name),
+            'description' : self.get_description(r),
+            'habitat' : self.get_habitat(r),
+            'isLegendary' : r.get('is_legendary', False)
+        }
+        return response
     
     @staticmethod
     @lru_cache
@@ -66,7 +63,13 @@ class PokemonClient:
         garbage collected.
         """
         logger.debug('Result not present in cache. Requesting data from network.')
-        return requests.get(url)
+        r = requests.get(url)
+
+        if r.ok and r.json() is not None:
+            return r.json()
+
+        raise Exception
+
 
     def get_pokemon_info_translated(self, name: str) -> dict:
         basic_info = self.get_pokemon_info_basic(name)
@@ -84,8 +87,44 @@ class PokemonClient:
 
         Can receive code 429 from the translation api.
         """
-        logger.debug('Attempting translation.')
+        logger.info('Attempting translation.')
+        translation_kind = self.get_translation_kind(basic_info)
+        logger.debug('Attempting "%s" translation.', translation_kind)
 
+        translation_url = urljoin(self.translate_api, f'translate/{translation_kind}')
+        request_data = {'text': basic_info.get('description')}
+
+        prepared_request = PreparedRequest()
+        prepared_request.prepare_url(translation_url, request_data)
+
+        logger.debug('Attempting translation from url: %s', prepared_request.url)
+        translation_req_json = self.fetch_url(prepared_request.url)
+        
+        translated_description = self.extract_translation(translation_req_json)
+
+        # Return merged dictionary
+        return {**basic_info, **{'description': translated_description}}
+
+    @staticmethod
+    def extract_translation(response: dict) -> Optional[str]:
+        """
+        Extract the translation from the the response of the funtranslations API
+        """
+        translated_description = None
+        if (
+            response.get('success') is not None and
+            response.get('success').get('total', 0) > 0
+        ): 
+            translated_description = (
+                response
+                .get('contents')
+                .get('translated') 
+                if response.get('contents') else None
+            )
+        return translated_description
+
+    @staticmethod
+    def get_translation_kind(basic_info: dict) -> str:
         translation_kind = 'shakespeare'
 
         habitat = basic_info.get('habitat')
@@ -95,42 +134,16 @@ class PokemonClient:
             logger.debug('Habitat detected as %s. Legendary status is %s', habitat, is_legendary)
             translation_kind = 'yoda'
 
-        logger.info('Attempting "%s" translation.', translation_kind)
-
-        translation_url = urljoin(self.translate_api, f'translate/{translation_kind}')
-        request_data = {'text': basic_info.get('description')}
-
-        prepared_request = PreparedRequest()
-        prepared_request.prepare_url(translation_url, request_data)
-
-        logger.debug('Attempting translation from url: %s', prepared_request.url)
-        translation_req = self.fetch_url(prepared_request.url)
-        
-        translated_description = None
-        if translation_req.ok:
-            translation_req_json = translation_req.json()
-            if (
-                translation_req_json.get('success') is not None and
-                translation_req_json.get('success').get('total', 0) > 0
-            ): 
-                translated_description = (
-                    translation_req_json
-                    .get('contents')
-                    .get('translated') 
-                    if translation_req_json.get('contents') else None
-                )
-
-        # Return merged dictionary
-        return {**basic_info, **{'description': translated_description}}
+        return translation_kind
 
     @staticmethod
     def get_habitat(json_content: dict) -> Optional[str]:
         """
         Extract the habitat value from the `json_content`
         """
-        habitat = json_content.get('habitat')
-        if habitat:
-            return habitat.get('name')
+        habitat_dict = json_content.get('habitat')
+        if habitat_dict:
+            return habitat_dict.get('name')
         logger.debug('No valid habitat value found')
         return None
             
