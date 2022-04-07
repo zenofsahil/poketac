@@ -14,6 +14,16 @@ def test_payload_keys(client):
     assert "habitat" in payload
     assert "isLegendary" in payload
 
+def test_payload_keys_translation_endpoint(client):
+    response = client.get("/pokemon/translated/pikachu")
+    assert response.status_code == 200
+
+    payload = response.json()[0]
+
+    assert "name" in payload
+    assert "description" in payload
+    assert "habitat" in payload
+    assert "isLegendary" in payload
 
 def test_pokemonapi_client_caching(monkeypatch):
 
