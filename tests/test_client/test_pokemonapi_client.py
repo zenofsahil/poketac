@@ -4,11 +4,36 @@ from pokeapi.main import pokemon_client
 from datetime import datetime
 
 class TestPokemonClient:
-    def test_get_pokemon_info(self):
+    def test_get_pokemon_info(self, pokemon_data, monkeypatch):
+        def patched(arg):
+            return pokemon_data('pikachu')
+
+        monkeypatch.setattr(pokemon_client, 'fetch_url', patched)
+        output = pokemon_client.get_pokemon_info(name='pikachu', translate=False)
+        expected_output =  {
+            "name": "pikachu",
+            "habitat": "forest",
+            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
+            "isLegendary": False
+        }
+        assert output == expected_output
+
+    def test_get_pokemon_info_translated_flag(self, pokemon_data):
         raise NotImplementedError
 
-    def test_get_pokemon_info_basic(self):
-        raise NotImplementedError
+    def test_get_pokemon_info_basic(self, pokemon_data, monkeypatch):
+        def patched(arg):
+            return pokemon_data('pikachu')
+
+        monkeypatch.setattr(pokemon_client, 'fetch_url', patched)
+        output = pokemon_client.get_pokemon_info(name='pikachu', translate=False)
+        expected_output =  {
+            "name": "pikachu",
+            "habitat": "forest",
+            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
+            "isLegendary": False
+        }
+        assert output == expected_output
 
     def test_get_pokemon_info_translated(self):
         raise NotImplementedError
