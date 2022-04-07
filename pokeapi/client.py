@@ -84,18 +84,9 @@ class PokemonClient:
 
         Can receive code 429 from the translation api.
         """
-        logger.debug('Attempting translation.')
-
-        translation_kind = 'shakespeare'
-
-        habitat = basic_info.get('habitat')
-        is_legendary = basic_info.get('isLegendary')
-        
-        if habitat == 'cave' or is_legendary:
-            logger.debug('Habitat detected as %s. Legendary status is %s', habitat, is_legendary)
-            translation_kind = 'yoda'
-
-        logger.info('Attempting "%s" translation.', translation_kind)
+        logger.info('Attempting translation.')
+        translation_kind = self.get_translation_kind(basic_info)
+        logger.debug('Attempting "%s" translation.', translation_kind)
 
         translation_url = urljoin(self.translate_api, f'translate/{translation_kind}')
         request_data = {'text': basic_info.get('description')}
@@ -122,6 +113,19 @@ class PokemonClient:
 
         # Return merged dictionary
         return {**basic_info, **{'description': translated_description}}
+
+    @staticmethod
+    def get_translation_kind(basic_info: dict) -> str:
+        translation_kind = 'shakespeare'
+
+        habitat = basic_info.get('habitat')
+        is_legendary = basic_info.get('isLegendary')
+        
+        if habitat == 'cave' or is_legendary:
+            logger.debug('Habitat detected as %s. Legendary status is %s', habitat, is_legendary)
+            translation_kind = 'yoda'
+
+        return translation_kind
 
     @staticmethod
     def get_habitat(json_content: dict) -> Optional[str]:
