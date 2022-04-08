@@ -68,6 +68,7 @@ Good to haves
     - Currently the application uses in-memory caching for requests (explained in the code) requests caching should be brought to the caching layer built on redis. Redis is already being used for rate limiting functionality.
 8. Type checking using **mypy**
 9. Application usage reports using **Celery**
+10. Trimmed down `requirements.txt` file. Contains a lot of development related requirements.
 
 License
 -------
