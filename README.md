@@ -62,7 +62,7 @@ Good to haves
 3. Auth using tokens
 4. Test coverage metrics
 5. Integration test suite
-   The unit test suit is present and covers most functionality. It would also be good to have integrations tests for things such as rate limiting in the context of the live application.
+   - The unit test suit is present and covers most functionality. It would also be good to have integrations tests for things such as rate limiting in the context of the live application.
 6. Load testing metrics
 7. Caching API responses in Redis
     - Currently the application uses in-memory caching for requests (explained in the code) requests caching should be brought to the caching layer built on redis. Redis is already being used for rate limiting functionality.
