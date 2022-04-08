@@ -1,0 +1,8 @@
+PROJECT_NAME="Poketac"
+BACKEND_CORS_ORIGINS=["http://localhost:8000", "https://localhost:8000", "http://localhost", "https://localhost"]
+BASE_URL="https://pokeapi.co"
+ENDPOINT="api/v2/pokemon-species"
+TRANSLATE_API="https://api.funtranslations.com/translate"
+LOG_LEVEL="DEBUG"
+RATE_LIMIT_SECONDS=10
+RATE_LIMIT_HITS=5
