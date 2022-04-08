@@ -44,6 +44,10 @@ def create_app():
 async def rate_limit_middleware(request: Request, call_next):
     logger.info(f"Received request from: {request.client.host}")
 
+    # Do not rate limit development or testing environment
+    if settings.ENVIRONMENT == "test":
+        return await call_next(request)
+
     if redis_client.get(request.client.host) is None:
         redis_client.set(
             request.client.host,

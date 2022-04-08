@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     RATE_LIMIT_SECONDS: int
     RATE_LIMIT_HITS: int
 
+    ENVIRONMENT: str = "prod"
+
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
