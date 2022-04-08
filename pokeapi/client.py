@@ -6,6 +6,10 @@ from typing import Optional
 from urllib.parse import urljoin
 from requests.models import PreparedRequest
 from pokeapi.utils import remove_nonprintable_chars
+from pokeapi.exceptions import (
+    PokemonAPIHTTPException,
+    TranslationAPIHTTPException
+)
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +72,7 @@ class PokemonClient(Client):
         if r.ok and r.json() is not None:
             return r.json()
 
-        raise 
+        raise PokemonAPIHTTPException(detail=r.reason, status_code=r.status_code)
 
     @staticmethod
     def get_habitat(json_content: dict) -> Optional[str]:
@@ -171,7 +175,7 @@ class TranslateClient:
         """
         This method is duplicated from PokemonClient and not commonly inherited so that 
         1. The caches for the 2 apis can live separately.
-        2. Client specific exceptions can be thrown in a more straightforward way.
+        2. Logic for throwing client specific exceptions will not live together.
         """
         logger.debug('Result not present in cache. Requesting data from network.')
         r = requests.get(url)
@@ -179,4 +183,4 @@ class TranslateClient:
         if r.ok and r.json() is not None:
             return r.json()
 
-        raise 
+        raise TranslationAPIHTTPException(detail=r.reason, status_code=r.status_code)
