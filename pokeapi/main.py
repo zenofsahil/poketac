@@ -26,15 +26,18 @@ def get_log_level():
 logging.basicConfig(level=get_log_level())
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title=settings.PROJECT_NAME)
+def create_app():
+    app = FastAPI(title=settings.PROJECT_NAME)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.BACKEND_CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    return app
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = create_app()
 
 def create_pokemon_client():
     return client.PokemonClient(
