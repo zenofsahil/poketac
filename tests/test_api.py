@@ -53,12 +53,6 @@ def test_invalid_pokemon(client):
     assert r.ok == False
     assert r.status_code == 404
 
-def test_pokemon_api_down():
-    raise NotImplementedError
-
-def test_translation_api_down():
-    raise NotImplementedError
-
 @pytest.mark.parametrize('url_part', [
     "/pokemons/hello",
     "/index.html",
