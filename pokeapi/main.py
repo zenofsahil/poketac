@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 from http import HTTPStatus
 
@@ -8,9 +9,12 @@ from fastapi.encoders import jsonable_encoder
 from pokeapi import schemas
 from pokeapi.config import settings
 from pokeapi import client
-
-import logging
-from pokeapi.config import settings
+from pokeapi.exceptions import (
+    PokemonAPIException,
+    PokemonAPIHTTPException,
+    TranslationAPIException,
+    TranslationAPIHTTPException
+)
 
 def get_log_level():
     if settings.LOG_LEVEL == 'INFO':
@@ -21,9 +25,6 @@ def get_log_level():
 
 logging.basicConfig(level=get_log_level())
 logger = logging.getLogger(__name__)
-
-logger.info('hello info')
-logger.debug('hello debuug')
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -48,7 +49,14 @@ def create_translate_client():
 
 @app.get("/pokemon/{pokemon_name}", response_model=schemas.PokemonInfo)
 def get_pokemon_info(pokemon_name: str, pokemon_client = Depends(create_pokemon_client)):
-    pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
+
+    try:
+        pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
+    except PokemonAPIHTTPException:
+        raise
+    except:
+        raise PokemonAPIException
+
     return pokemon
 
 @app.get("/pokemon/translated/{pokemon_name}", response_model=schemas.PokemonInfo)
@@ -57,8 +65,19 @@ def get_pokemon_info_translated(
     pokemon_client = Depends(create_pokemon_client),
     translate_client = Depends(create_translate_client)
 ):
-    pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
-    translated = translate_client.translate_description(pokemon)
+    try:
+        pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
+    except PokemonAPIHTTPException:
+        raise 
+    except: 
+        raise PokemonAPIException
+
+    try:
+        translated = translate_client.translate_description(pokemon)
+    except TranslationAPIHTTPException:
+        raise
+    except:
+        raise TranslationAPIException
 
     return translated
 
