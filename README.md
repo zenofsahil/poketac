@@ -12,6 +12,10 @@ The endpoints provide basic information about the pokemon specified. The `transl
 Running
 -------
 
+Your system will need to have Docker available. Once you ensure you have Docker, clone this repo using `git clone git@github.com:zenofsahil/poketac.git`. 
+
+Check the environment variables as defined inside `sample.envars` and rename the file to `.envars`. It needs to stay within the project root.
+
 The application is defined entirely within the docker related files. You can check those out to see what's happening under the
 hood. But the project setup and running is as easy as the following -
 
