@@ -63,7 +63,7 @@ async def rate_limit_middleware(request: Request, call_next):
 
         if (
             delta.seconds < settings.RATE_LIMIT_SECONDS and 
-            hitcount > settings.RATE_LIMIT_HITS
+            hitcount >= settings.RATE_LIMIT_HITS
         ):
             logger.debug("Rate limit exceeded by {request.client.host}")
             return PlainTextResponse("Rate limit exceeded", status_code=429)
