@@ -1,10 +1,13 @@
 import logging
 from typing import List, Optional
 from http import HTTPStatus
+from datetime import datetime, timedelta
 
 from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
+from starlette.requests import Request
 
 from pokeapi import schemas
 from pokeapi.config import settings
@@ -15,6 +18,7 @@ from pokeapi.exceptions import (
     TranslationAPIException,
     TranslationAPIHTTPException
 )
+from pokeapi.redis import redis_client
 
 def get_log_level():
     if settings.LOG_LEVEL == 'INFO':
@@ -37,7 +41,42 @@ def create_app():
     )
     return app
 
+async def rate_limit_middleware(request: Request, call_next):
+    logger.info(f"Received request from: {request.client.host}")
+
+    if redis_client.get(request.client.host) is None:
+        redis_client.set(
+            request.client.host,
+            f"{datetime.utcnow().timestamp()}-1",
+            ex=timedelta(seconds=settings.RATE_LIMIT_SECONDS)
+        )
+    else:
+        timestamp, hitcount = redis_client.get(request.client.host).split('-')
+        hitcount = int(hitcount)
+        timestamp = float(timestamp)
+        timeobj = datetime.fromtimestamp(timestamp)
+        delta = datetime.utcnow() - timeobj
+
+        logger.debug(f"Host: {request.client.host} has hitcount: {hitcount}")
+
+        logger.debug(f"seconds: {delta.seconds}")
+
+        if (
+            delta.seconds < settings.RATE_LIMIT_SECONDS and 
+            hitcount > settings.RATE_LIMIT_HITS
+        ):
+            logger.debug("Rate limit exceeded by {request.client.host}")
+            return PlainTextResponse("Rate limit exceeded", status_code=429)
+        else:
+            redis_client.set(
+                request.client.host,
+                f"{timestamp}-{hitcount + 1}",
+                keepttl=True
+            )
+    return await call_next(request)
+
 app = create_app()
+app.middleware('http')(rate_limit_middleware)
 
 def create_pokemon_client():
     return client.PokemonClient(
