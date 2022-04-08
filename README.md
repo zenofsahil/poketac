@@ -1,7 +1,7 @@
 Poketac
 ===
 
-This is proof of concept app that uses [pokeapi](https://pokeapi.co) and [funtranslations](https://funtranslations.com/) to provide users with two endpoints:
+This is a proof of concept app that uses [pokeapi](https://pokeapi.co) and [funtranslations](https://funtranslations.com/) to provide users with two endpoints:
 
 1. `/pokemon/<name>`
 2. `/pokemon/translated/<name>`
