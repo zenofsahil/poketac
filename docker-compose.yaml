@@ -4,7 +4,7 @@ services:
 
   pokeapi:
     container_name: pokeapi
-    image: myimage
+    image: pokemon_image
     build:
         context: .
         dockerfile: ./Dockerfile
