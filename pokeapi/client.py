@@ -65,6 +65,12 @@ class PokemonClient(Client):
         lifetime of the class definition, the initialized cache object will 
         continue to exist even after specific instances of the class have been
         garbage collected.
+
+        NOTE: Using in-memory caching would also mean that caches will be specific
+        to the worker that the process is being run under. With uvicorn, we usually
+        start the app with multiple workers and so this way of caching is not the
+        best strategy. A caching layer that could serve all running workers would
+        be the ideal solution.
         """
         logger.debug('Result not present in cache. Requesting data from network.')
         r = requests.get(url)
@@ -173,6 +179,8 @@ class TranslateClient:
     @lru_cache
     def fetch_url(url: str) -> dict:
         """
+        Please see: `PokemonClient.fetch_url`
+
         This method is duplicated from PokemonClient and not commonly inherited so that 
         1. The caches for the 2 apis can live separately.
         2. Logic for throwing client specific exceptions will not live together.
