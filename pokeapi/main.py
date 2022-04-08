@@ -95,6 +95,7 @@ def get_pokemon_info(pokemon_name: str, pokemon_client = Depends(create_pokemon_
     try:
         pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
     except PokemonAPIHTTPException:
+        # Resurface http exceptions to be handled by their own handler
         raise
     except:
         raise PokemonAPIException
@@ -110,6 +111,7 @@ def get_pokemon_info_translated(
     try:
         pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
     except PokemonAPIHTTPException:
+        # Resurface http exceptions to be handled by their own handler
         raise 
     except: 
         raise PokemonAPIException
@@ -117,6 +119,7 @@ def get_pokemon_info_translated(
     try:
         translated = translate_client.translate_description(pokemon)
     except TranslationAPIHTTPException:
+        # Resurface http exceptions to be handled by their own handler
         raise
     except:
         raise TranslationAPIException
