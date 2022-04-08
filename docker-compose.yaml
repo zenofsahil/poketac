@@ -8,6 +8,8 @@ services:
     build:
         context: .
         dockerfile: ./Dockerfile
+    depends_on:
+      - redis
     volumes:
       - ./pokeapi:/app/pokeapi
     env_file: .envars
@@ -16,4 +18,12 @@ services:
       - "8000:80"
     stdin_open: true
     tty: true
+
+  redis:
+    image: redis:alpine3.13
+    container_name: redis
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
 
