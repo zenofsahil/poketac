@@ -1,10 +1,22 @@
 import pytest
 
-def test_payload_keys(client):
-    response = client.get("/pokemon/pikachu")
+@pytest.mark.parametrize('pokemon_name', [
+    'pikachu',
+    'charizard',
+    'snorlax',
+    'heatran',
+    'ditto',
+    'mew',
+    'mewtwo',
+    'dialga',
+    'lopunny',
+    'gible'
+])
+def test_payload_keys(client, pokemon_name):
+    response = client.get(f"/pokemon/{pokemon_name}")
     assert response.status_code == 200
 
-    payload = response.json()[0]
+    payload = response.json()
 
     assert "name" in payload
     assert "description" in payload
@@ -16,7 +28,7 @@ def test_payload_keys_translation_endpoint(client):
     response = client.get("/pokemon/translated/pikachu")
     assert response.status_code == 200
 
-    payload = response.json()[0]
+    payload = response.json()
 
     assert "name" in payload
     assert "description" in payload
