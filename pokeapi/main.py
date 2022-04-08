@@ -5,6 +5,7 @@ from http import HTTPStatus
 from fastapi import Depends, FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
+from starlette.requests import Request
 
 from pokeapi import schemas
 from pokeapi.config import settings
@@ -15,6 +16,7 @@ from pokeapi.exceptions import (
     TranslationAPIException,
     TranslationAPIHTTPException
 )
+from pokeapi.redis import redis_client
 
 def get_log_level():
     if settings.LOG_LEVEL == 'INFO':
@@ -37,7 +39,12 @@ def create_app():
     )
     return app
 
+async def rate_limit_middleware(request: Request, call_next):
+    logger.info(f"Received request from: {request.client.host}")
+    return await call_next(request)
+
 app = create_app()
+app.middleware('http')(rate_limit_middleware)
 
 def create_pokemon_client():
     return client.PokemonClient(
