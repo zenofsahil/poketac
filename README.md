@@ -22,6 +22,11 @@ Spin up the containers with
 $ docker-compose up -d --build
 ```
 
+Stop and remove containers with
+```
+$ docker-compose down
+```
+
 Using the API
 -------------
 
@@ -35,11 +40,6 @@ $ curl -i localhost:8000/pokemon/translated/pikachu`
 ```
 
 Please note that the application implements rate limiting based on the host that is making the query. The rate limiting window and the number of hits permitted within that window are defined within the `.envars` settings file.
-
-Stop and remove containers with
-```
-$ docker-compose down
-```
 
 Running Tests
 -------
