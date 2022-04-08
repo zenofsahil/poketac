@@ -35,21 +35,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-pokemon_client = client.PokemonClient(
-    base_url=settings.BASE_URL,
-    endpoint=settings.ENDPOINT
-)
-translate_client = client.TranslateClient(
-    translate_url=settings.TRANSLATE_API
-)
+def create_pokemon_client():
+    return client.PokemonClient(
+        base_url=settings.BASE_URL,
+        endpoint=settings.ENDPOINT
+    )
+
+def create_translate_client():
+    return client.TranslateClient(
+        translate_url=settings.TRANSLATE_API
+    )
 
 @app.get("/pokemon/{pokemon_name}", response_model=schemas.PokemonInfo)
-def get_pokemon_info(pokemon_name: str):
+def get_pokemon_info(pokemon_name: str, pokemon_client = Depends(create_pokemon_client)):
     pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
     return pokemon
 
 @app.get("/pokemon/translated/{pokemon_name}", response_model=schemas.PokemonInfo)
-def get_pokemon_info_translated(pokemon_name: str):
+def get_pokemon_info_translated(
+    pokemon_name: str,
+    pokemon_client = Depends(create_pokemon_client),
+    translate_client = Depends(create_translate_client)
+):
     pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
     translated = translate_client.translate_description(pokemon)
 
