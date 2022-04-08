@@ -12,7 +12,10 @@ The endpoints provide basic information about the pokemon specified. The `transl
 Running
 -------
 
-Your system will need to have Docker available. Once you ensure you have Docker, clone this repo using `git clone git@github.com:zenofsahil/poketac.git`. 
+Your system will need to have Docker available. Once you ensure you have Docker, clone this repo using 
+```
+$ git clone git@github.com:zenofsahil/poketac.git
+```
 
 Check the environment variables as defined inside `sample.envars` and rename the file to `.envars`. It needs to stay within the project root.
 
@@ -52,6 +55,8 @@ Test with
 ```
 $ docker-compose run pokeapi bash -c "ENVIRONMENT=test python -m pytest -v"
 ```
+
+You need to set the `ENVIRONMENT` environment variable to make the application not rate limit while running tests.
 
 Application features
 ------------
