@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 from http import HTTPStatus
 
@@ -8,9 +9,12 @@ from fastapi.encoders import jsonable_encoder
 from pokeapi import schemas
 from pokeapi.config import settings
 from pokeapi import client
-
-import logging
-from pokeapi.config import settings
+from pokeapi.exceptions import (
+    PokemonAPIException,
+    PokemonAPIHTTPException,
+    TranslationAPIException,
+    TranslationAPIHTTPException
+)
 
 def get_log_level():
     if settings.LOG_LEVEL == 'INFO':
@@ -22,9 +26,6 @@ def get_log_level():
 logging.basicConfig(level=get_log_level())
 logger = logging.getLogger(__name__)
 
-logger.info('hello info')
-logger.debug('hello debuug')
-
 app = FastAPI(title=settings.PROJECT_NAME)
 
 app.add_middleware(
@@ -35,23 +36,48 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-pokemon_client = client.PokemonClient(
-    base_url=settings.BASE_URL,
-    endpoint=settings.ENDPOINT,
-    translate_api=settings.TRANSLATE_API
-)
+def create_pokemon_client():
+    return client.PokemonClient(
+        base_url=settings.BASE_URL,
+        endpoint=settings.ENDPOINT
+    )
 
-@app.get("/pokemon/{pokemon_name}", response_model=List[schemas.PokemonInfo])
-def get_pokemon_info(pokemon_name: str):
-    pokemons = [
-        pokemon_client.get_pokemon_info(name=pokemon_name, translate=False)
-    ]
-    return pokemons
+def create_translate_client():
+    return client.TranslateClient(
+        translate_url=settings.TRANSLATE_API
+    )
 
-@app.get("/pokemon/translated/{pokemon_name}", response_model=List[schemas.PokemonInfo])
-def get_pokemon_info_translated(pokemon_name: str):
-    pokemons = [
-        pokemon_client.get_pokemon_info(name=pokemon_name, translate=True)
-    ]
-    return pokemons
+@app.get("/pokemon/{pokemon_name}", response_model=schemas.PokemonInfo)
+def get_pokemon_info(pokemon_name: str, pokemon_client = Depends(create_pokemon_client)):
+
+    try:
+        pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
+    except PokemonAPIHTTPException:
+        raise
+    except:
+        raise PokemonAPIException
+
+    return pokemon
+
+@app.get("/pokemon/translated/{pokemon_name}", response_model=schemas.PokemonInfo)
+def get_pokemon_info_translated(
+    pokemon_name: str,
+    pokemon_client = Depends(create_pokemon_client),
+    translate_client = Depends(create_translate_client)
+):
+    try:
+        pokemon = pokemon_client.get_pokemon_info(name=pokemon_name)
+    except PokemonAPIHTTPException:
+        raise 
+    except: 
+        raise PokemonAPIException
+
+    try:
+        translated = translate_client.translate_description(pokemon)
+    except TranslationAPIHTTPException:
+        raise
+    except:
+        raise TranslationAPIException
+
+    return translated
 

@@ -3,7 +3,7 @@ from typing import Optional
 
 class PokemonInfo(BaseModel):
     name: str
-    habitat: str
+    habitat: Optional[str]
     description: Optional[str]
     isLegendary: bool
 

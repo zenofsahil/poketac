@@ -2,11 +2,15 @@ import pytest
 from unittest.mock import Mock
 from requests.models import Response
 from pokeapi.client import requests
-from pokeapi.main import pokemon_client
+from pokeapi.main import create_pokemon_client
 from datetime import datetime
 
+@pytest.fixture(name="pokemon_client")
+def pokemon_client():
+    return create_pokemon_client()
+
 class TestPokemonClient:
-    def test_get_pokemon_info(self, pokemon_data, monkeypatch):
+    def test_get_pokemon_info(self, pokemon_data, monkeypatch, pokemon_client):
         def patched(arg):
             res = Mock(spec=Response)
             res.json.return_value = pokemon_data('pikachu')
@@ -14,7 +18,7 @@ class TestPokemonClient:
             return res
 
         monkeypatch.setattr(requests, 'get', patched)
-        output = pokemon_client.get_pokemon_info(name='pikachu', translate=False)
+        output = pokemon_client.get_pokemon_info(name='pikachu')
         expected_output =  {
             "name": "pikachu",
             "habitat": "forest",
@@ -22,28 +26,6 @@ class TestPokemonClient:
             "isLegendary": False
         }
         assert output == expected_output
-
-    def test_get_pokemon_info_basic(self, pokemon_data, monkeypatch):
-        def patched(arg):
-            res = Mock(spec=Response)
-            res.json.return_value = pokemon_data('pikachu')
-            res.status_code = 200
-            return res
-
-        monkeypatch.setattr(requests, 'get', patched)
-
-        output = pokemon_client.get_pokemon_info(name='pikachu', translate=False)
-        expected_output =  {
-            "name": "pikachu",
-            "habitat": "forest",
-            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
-            "isLegendary": False
-        }
-        assert output == expected_output
-
-    @pytest.mark.skip(reason="All functionality in this method is already being tested")
-    def test_get_pokemon_info_translated(self):
-        raise NotImplementedError
 
     def test_fetch_url(self):
         """ The fetch_url method is trivially implemented and the core 
@@ -52,74 +34,18 @@ class TestPokemonClient:
         """
         assert True
 
-    def test_extract_translation(self):
-        response = {
-            "success": {
-                "total": 1
-            },
-            "contents": {
-                "translated": "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms.",
-                "text": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
-                "translation": "shakespeare"
-            }
-        }
-        translation =  "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms."
-
-        assert pokemon_client.extract_translation(response) == translation
-
-
-    def test_translate_description(self, monkeypatch):
-        """
-        This test is there only to test the end to end functionality of the
-        `translate_description` method.
-        """
-        basic_info = {
-            "name": "pikachu",
-            "habitat": "forest",
-            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
-            "isLegendary": True
-        }
-
-        def patched(arg):
-            res = Mock(spec=Response)
-            res.json.return_value = {
-                "success": {
-                    "total": 1
-                },
-                "contents": {
-                    "translated": "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms.",
-                    "text": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
-                    "translation": "shakespeare"
-                }
-            }
-            res.status_code = 200
-            return res
-        
-        monkeypatch.setattr(requests, 'get', patched)
-
-        expected_output = {
-            "name": "pikachu",
-            "habitat": "forest",
-            "description": "At which hour several of these pokémon gather,  their electricity couldst buildeth and cause lightning storms.",
-            "isLegendary": True
-        }
-
-
-        translated_res = pokemon_client.translate_description(basic_info)
-        assert translated_res == expected_output
-
-    def test_get_habitat(self, pokemon_data):
+    def test_get_habitat(self, pokemon_data, pokemon_client):
         data = pokemon_data('pikachu')
         habitat = pokemon_client.get_habitat(data)
         assert habitat == 'forest'
 
-    def test_get_description(self, pokemon_data):
+    def test_get_description(self, pokemon_data, pokemon_client):
         pikachu_info = pokemon_data("pikachu")
         description = pokemon_client.get_description(pikachu_info)
         expected_description = "When several of these POKéMON gather, their electricity could build and cause lightning storms."
         assert description == expected_description
 
-    def test_get_description_no_english_description_found(self, pokemon_data):
+    def test_get_description_no_english_description_found(self, pokemon_data, pokemon_client):
         pikachu_info = pokemon_data("pikachu")
         descriptions = [
             d for d in pikachu_info['flavor_text_entries']
@@ -130,40 +56,7 @@ class TestPokemonClient:
         expected_description = None
         assert description == expected_description
 
-    def test_get_translation_kind_yoda_1(self):
-        basic_info = {
-            "name": "pikachu",
-            "habitat": "forest",
-            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
-            "isLegendary": True
-        }
-
-        kind = pokemon_client.get_translation_kind(basic_info)
-        assert kind == 'yoda'
-
-    def test_get_translation_kind_yoda_2(self):
-        basic_info = {
-            "name": "pikachu",
-            "habitat": "cave",
-            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
-            "isLegendary": False
-        }
-
-        kind = pokemon_client.get_translation_kind(basic_info)
-        assert kind == 'yoda'
-
-    def test_get_translation_kind_shakespeare(self):
-        basic_info = {
-            "name": "pikachu",
-            "habitat": "forest",
-            "description": "When several of these POKéMON gather, their electricity could build and cause lightning storms.",
-            "isLegendary": False
-        }
-
-        kind = pokemon_client.get_translation_kind(basic_info)
-        assert kind == 'shakespeare'
-
-    def test_pokemonapi_client_caching(self, monkeypatch):
+    def test_pokemonapi_client_caching(self, monkeypatch, pokemon_client):
 
         def patched(arg):
             res = Mock(spec=Response)
