@@ -50,33 +50,20 @@ async def rate_limit_middleware(request: Request, call_next):
 
     if redis_client.get(request.client.host) is None:
         redis_client.set(
-            request.client.host,
-            f"{datetime.utcnow().timestamp()}-1",
-            ex=timedelta(seconds=settings.RATE_LIMIT_SECONDS)
+            request.client.host, 1, ex=timedelta(seconds=settings.RATE_LIMIT_SECONDS)
         )
     else:
-        timestamp, hitcount = redis_client.get(request.client.host).split('-')
+        hitcount = redis_client.get(request.client.host)
         hitcount = int(hitcount)
-        timestamp = float(timestamp)
-        timeobj = datetime.fromtimestamp(timestamp)
-        delta = datetime.utcnow() - timeobj
 
-        logger.debug(f"Host: {request.client.host} has hitcount: {hitcount}")
+        logger.debug(f"Host: {request.client.host} has hitcount: {hitcount} within rate limit time window.")
 
-        logger.debug(f"seconds: {delta.seconds}")
-
-        if (
-            delta.seconds < settings.RATE_LIMIT_SECONDS and 
-            hitcount >= settings.RATE_LIMIT_HITS
-        ):
+        if hitcount >= settings.RATE_LIMIT_HITS:
             logger.debug("Rate limit exceeded by {request.client.host}")
             return PlainTextResponse("Rate limit exceeded", status_code=429)
         else:
-            redis_client.set(
-                request.client.host,
-                f"{timestamp}-{hitcount + 1}",
-                keepttl=True
-            )
+            redis_client.set(request.client.host, hitcount + 1, keepttl=True)
+
     return await call_next(request)
 
 app = create_app()
