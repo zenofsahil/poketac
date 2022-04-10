@@ -63,6 +63,7 @@ Application features
 1. Robust unit test suite
 2. Logging
 3. Rate limiting
+    - You can control rate limiting by setting the `RATE_LIMIT_HITS` and `RATE_LIMIT_SECONDS` environment variables in the `.envars` file. These variables control how many times (`RATE_LIMIT_HITS`) per (`RATE_LIMIT_SECONDS`) seconds users of the api can make requests.
 
 Good to haves
 ------------
