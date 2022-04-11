@@ -1,12 +1,10 @@
 import logging
-from typing import List, Optional
-from http import HTTPStatus
 from datetime import datetime, timedelta
 
-from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi import status
+from fastapi import Depends, FastAPI
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.encoders import jsonable_encoder
 from starlette.requests import Request
 
 from pokeapi import schemas
@@ -60,7 +58,7 @@ async def rate_limit_middleware(request: Request, call_next):
 
         if hitcount >= settings.RATE_LIMIT_HITS:
             logger.debug("Rate limit exceeded by {request.client.host}")
-            return PlainTextResponse("Rate limit exceeded", status_code=429)
+            return PlainTextResponse("Rate limit exceeded", status_code=status.HTTP_429_TOO_MANY_REQUESTS)
         else:
             redis_client.set(request.client.host, hitcount + 1, keepttl=True)
 
