@@ -1,4 +1,5 @@
 import logging
+from fastapi import status
 from fastapi import Request
 from fastapi.responses import PlainTextResponse
 from pokeapi.main import app
@@ -25,9 +26,9 @@ async def pokemon_translation_api_http__exception_handler(request: Request, exc:
 @app.exception_handler(TranslationAPIException)
 async def pokemon_translation_api_exception_handler(request: Request, exc: TranslationAPIException):
     logger.error(f"{exc.__class__.__name__}")
-    return PlainTextResponse("Internal Error", status_code=500)
+    return PlainTextResponse("Internal Error", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @app.exception_handler(PokemonAPIException)
 async def pokemon_api_exception_handler(request: Request, exc: PokemonAPIException):
     logger.error(f"{exc.__class__.__name__}")
-    return PlainTextResponse("Internal Error", status_code=500)
+    return PlainTextResponse("Internal Error", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
