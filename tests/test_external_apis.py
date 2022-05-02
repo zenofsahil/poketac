@@ -51,14 +51,6 @@ def test_translation_api_shakespeare_translation():
 
     json = r.json()
 
-    
-    from IPython import embed 
-    from traitlets.config import get_config 
-    c = get_config() 
-    c.InteractiveShellEmbed.colors = "Linux" 
-    embed(config=c)
-     
-
     assert 'success' in json
     assert 'contents' in json
 
